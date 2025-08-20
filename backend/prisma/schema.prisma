@@ -1,0 +1,22 @@
+// Prisma配置文件 - 定义数据库连接和数据模型
+
+// 生成器配置 - 告诉Prisma生成TypeScript客户端
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 数据源配置 - 连接到PostgreSQL数据库
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 项目数据模型
+model Project {
+  id        Int      @id @default(autoincrement()) // 主键，自动递增
+  name      String   @unique                       // 项目名称，唯一约束防重复
+  createdAt DateTime @default(now())               // 创建时间，默认当前时间
+  updatedAt DateTime @updatedAt                    // 更新时间，自动更新
+
+  @@map("projects") // 映射到数据库表名
+}

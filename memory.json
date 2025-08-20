@@ -1,0 +1,2 @@
+{"type":"entity","name":"AICoding面试项目","entityType":"项目","observations":["这是一个AICoding公司的面试任务","技术栈包括：前端React.js + TypeScript，后端Hono.js + TypeScript，数据库Postgres + Prisma","主要功能：将市政业绩.xlsx文件导入数据库，在Web页面查询，支持搜索和翻页","数据需要在Redis中缓存60秒","前端界面必须使用ant-design pro-components的ProTable","支持文件上传，多次上传数据不能重复","部署到线上、使用域名和SSL是加分项"]}
+{"type":"entity","name":"市政业绩数据","entityType":"数据源","observations":["原始数据存储在市政业绩.xlsx文件中","需要将此文件数据导入到PostgreSQL数据库","数据导入时需要考虑去重"]}
