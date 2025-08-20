@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "D:\\Project\\Interview\\YZSKi\\memory.json"
+      }
+    },
+    "playwright": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-playwright"
+      ],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "false",
+        "PLAYWRIGHT_BROWSER": "chromium"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "mcp_playwright_browser_navigate",
+        "mcp_playwright_browser_snapshot",
+        "mcp_playwright_browser_click",
+        "mcp_playwright_browser_type",
+        "mcp_playwright_browser_take_screenshot"
+      ]
+    }
+  }
+}

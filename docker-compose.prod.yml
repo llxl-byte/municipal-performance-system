@@ -1,0 +1,115 @@
+# 生产环境Docker Compose配置
+# 📚 知识点：生产环境容器编排
+
+version: '3.8'
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: municipal_frontend_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - municipal_network
+
+  # 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: municipal_backend_prod
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - PORT=8000
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/log/municipal-performance
+    networks:
+      - municipal_network
+
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15
+    container_name: municipal_postgres_prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-municipal_performance}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    restart: unless-stopped
+    networks:
+      - municipal_network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: municipal_redis_prod
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_prod_data:/data
+    restart: unless-stopped
+    networks:
+      - municipal_network
+
+  # 监控服务 (可选)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: municipal_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - municipal_network
+    profiles:
+      - monitoring
+
+  # 日志收集 (可选)
+  fluentd:
+    image: fluent/fluentd:v1.16-debian-1
+    container_name: municipal_fluentd
+    volumes:
+      - ./logs:/fluentd/log
+      - ./monitoring/fluent.conf:/fluentd/etc/fluent.conf
+    ports:
+      - "24224:24224"
+    restart: unless-stopped
+    networks:
+      - municipal_network
+    profiles:
+      - logging
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  redis_prod_data:
+    driver: local
+  prometheus_data:
+    driver: local
+
+networks:
+  municipal_network:
+    driver: bridge
